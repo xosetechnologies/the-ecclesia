@@ -1,0 +1,389 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrgType {
+  NATIONAL
+  REGIONAL
+  DISTRICT
+  LOCAL
+}
+
+enum UserRole {
+  PLATFORM_SUPER_ADMIN
+  NATIONAL_ADMIN
+  REGIONAL_ADMIN
+  DISTRICT_ADMIN
+  ASSEMBLY_ADMIN
+  TEACHER
+  PARENT
+  STUDENT
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  LAPSED
+}
+
+model OrganizationUnit {
+  id                   String   @id @default(uuid())
+  name                String
+  type                OrgType
+  organizationId      String?
+  country             String?
+  address             String?
+  description        String?
+  status             AccountStatus @default(ACTIVE)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  geographicArea    String?
+  pastorLeader      String?
+  contactPhone      String?
+  subscriptionStatus SubscriptionStatus @default(ACTIVE)
+  notes             String?
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password     String
+  firstName    String
+  lastName     String
+  phone        String?
+  role         UserRole
+  profilePhoto String?
+  orgUnitId    String?
+  status      AccountStatus @default(ACTIVE)
+  createdAt    DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model LocalAssembly {
+  id             String   @id @default(uuid())
+  name           String
+  organizationId String
+  address        String?
+  pastorLeader  String?
+  contactPhone String?
+  email       String?
+  dateFounded DateTime?
+  status      AccountStatus @default(ACTIVE)
+  createdAt    DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  districtId   String?
+}
+
+model Class {
+  id          String   @id @default(uuid())
+  name        String
+  assemblyId  String
+  ageRangeMin Int?
+  ageRangeMax Int?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Teacher {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  assemblyId     String
+  joinDate       DateTime  @default(now())
+  qualifications String?
+  status        AccountStatus @default(ACTIVE)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Student {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  pin           String?  @unique
+  classId        String?
+  parentPhone   String?
+  dateOfBirth   DateTime?
+  gender       String?
+  photo        String?
+  enrollmentDate DateTime @default(now())
+  status        AccountStatus @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Attendance {
+  id         String   @id @default(uuid())
+  studentId  String
+  classId    String
+  date       DateTime
+  status     String
+  notes      String?
+  recordedBy String?
+}
+
+model LessonPlan {
+  id           String   @id @default(uuid())
+  title        String
+  classId      String
+  date        DateTime
+  biblePassage String?
+  objectives  String?
+  outline     String?
+  materials   String?
+  memoryVerse String?
+  activities  String?
+  status      String
+  createdAt   DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Assignment {
+  id               String   @id @default(uuid())
+  title            String
+  classId          String
+  description     String?
+  type             String
+  format           String
+  dateGiven        DateTime
+  dueDate          DateTime
+  deadlineBehavior String
+  maxMarks         Float
+  status           String
+  createdBy        String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model StudentSubmission {
+  id            String   @id @default(uuid())
+  studentId     String
+  assignmentId  String
+  status       String
+  submittedAt  DateTime?
+  totalScore  Float?
+}
+
+model StudentMark {
+  id            String   @id @default(uuid())
+  studentId     String
+  assignmentId  String
+  marksScored  Float
+  gradeLetter  String?
+  feedback    String?
+}
+
+model Event {
+  id           String   @id @default(uuid())
+  title        String
+  assemblyId   String
+  date         DateTime
+  time        String?
+  location   String?
+  description String?
+  feeAmount  Float?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  studentId    String?
+  teacherId   String?
+  type        String
+  amount     Float
+  period     String?
+  eventId    String?
+  status     String
+  dateRecorded DateTime @default(now())
+  recordedBy  String?
+  notes      String?
+}
+
+model CheckInRecord {
+  id            String   @id @default(uuid())
+  studentId     String
+  date         DateTime
+  checkInTime  DateTime
+  checkOutTime DateTime?
+  pickedUpBy  String?
+  securityCode String
+}
+
+model Notification {
+  id            String   @id @default(uuid())
+  recipientId  String
+  type        String
+  title       String
+  body       String
+  link       String?
+  read       Boolean  @default(false)
+  createdAt  DateTime  @default(now())
+}
+
+model Term {
+  id              String   @id @default(uuid())
+  name            String
+  academicYearId  String
+  startDate       DateTime
+  endDate        DateTime
+  theme         String?
+  status        String
+  createdAt     DateTime @default(now())
+}
+
+model AcademicYear {
+  id          String   @id @default(uuid())
+  name        String
+  startYear  Int
+  endYear    Int
+  status     String
+  createdAt  DateTime @default(now())
+}
+
+model Lesson {
+  id                String   @id @default(uuid())
+  title             String
+  topic             String?
+  targetClassId      String
+  description      String?
+  coverImage       String?
+  availabilityDate DateTime
+  estimatedReadingTime Int?
+  status           String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model TrainingProgram {
+  id              String   @id @default(uuid())
+  title          String
+  description   String?
+  objectives   String?
+  targetAudience String
+  duration     String?
+  mandatory    Boolean  @default(false)
+  status       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model TrainingModule {
+  id             String   @id @default(uuid())
+  programId      String
+  order         Int
+  title        String
+  contentBlocks String
+}
+
+model Book {
+  id               String   @id @default(uuid())
+  title            String
+  author           String?
+  category        String?
+  description    String?
+  coverImage     String?
+  isbn           String?
+  totalCopies    Int       @default(1)
+  digitalAvailable Boolean @default(false)
+  digitalFile    String?
+  status         String
+  createdAt      DateTime  @default(now())
+}
+
+model BookCopy {
+  id         String @id @default(uuid())
+  bookId     String
+  copyNumber Int
+  condition String?
+  status    String
+}
+
+model BorrowingRecord {
+  id           String   @id @default(uuid())
+  copyId       String
+  borrowerId   String
+  borrowerType String
+  checkoutDate DateTime
+  dueDate      DateTime
+  returnDate   DateTime?
+  fineAmount  Float     @default(0)
+  finePaid     Boolean  @default(false)
+}
+
+model VisitorRecord {
+  id               String   @id @default(uuid())
+  childName        String
+  estimatedAge   Int?
+  parentName    String?
+  contactNumber String?
+  source       String?
+  firstVisitDate DateTime
+  classAttended String?
+  status       String
+  assemblyId   String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Volunteer {
+  id          String   @id @default(uuid())
+  name        String
+  phone      String?
+  email      String?
+  serviceArea String
+  startDate  DateTime @default(now())
+  notes      String?
+  active     Boolean  @default(true)
+  assemblyId String
+  createdAt  DateTime  @default(now())
+}
+
+model AssemblySettings {
+  id                 String  @id @default(uuid())
+  assemblyId         String  @unique
+  churchName        String?
+  logo              String?
+  duesAmount       Float?
+  duesPeriod       String?
+  gradeBoundaries  String?
+  smsEnabled       Boolean @default(false)
+  whatsappEnabled  Boolean @default(false)
+  gamificationEnabled Boolean @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ContributionExpectation {
+  id             String   @id @default(uuid())
+  fromOrgId      String
+  toOrgId        String
+  amount        Float
+  period        String
+  percentage   Float?
+  setBy        String?
+  effectiveFrom DateTime
+  createdAt    DateTime  @default(now())
+}
+
+model ContributionPayment {
+  id             String   @id @default(uuid())
+  fromOrgId     String
+  toOrgId       String
+  amount       Float
+  periodCovered String?
+  dateReceived DateTime  @default(now())
+  recordedBy   String?
+  paymentMethod String?
+  notes        String?
+  createdAt   DateTime  @default(now())
+}
