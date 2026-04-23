@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';

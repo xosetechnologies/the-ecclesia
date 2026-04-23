@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 
 const AFRICAS_TALKING_API_KEY = process.env.AFRICAS_TALKING_API_KEY;
